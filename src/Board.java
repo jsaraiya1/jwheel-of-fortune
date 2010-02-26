@@ -1,5 +1,7 @@
 
 import java.io.*;
+import java.util.*;
+import javax.swing.*;
 
 /**
  * @author James Gunter
@@ -14,6 +16,7 @@ public class Board {
     public Board(File dictionaryFile)
     {
         this.dictionaryFile = dictionaryFile;
+
         newPhrase();
     }
 
@@ -24,8 +27,25 @@ public class Board {
 
     public void newPhrase()
     {
-        //get new phrase from dictionary
-        currentPhrase = "The Dog Ran";
+        FileReader in = null;
+        try
+        {
+            Random r = new Random(System.currentTimeMillis());
+            int lineToGet = r.nextInt() % getLinesCount();
+            in = new FileReader(dictionaryFile);
+            BufferedReader br = new BufferedReader(in);
+            String currentLine = br.readLine();
+            for(int i=0;i<lineToGet;i++)
+            {
+                currentLine = br.readLine();
+            }
+            this.currentPhrase = currentLine;
+        } catch (IOException ex)
+        {
+            JOptionPane.showMessageDialog(null, ex.toString(), "Error File Not Found", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
     }
     public int guessLetter(char letter)
     {
@@ -36,4 +56,19 @@ public class Board {
     {
         return (guess.equalsIgnoreCase(currentPhrase));
     }
+
+    private int getLinesCount() throws IOException {
+    InputStream is = new BufferedInputStream(new FileInputStream(dictionaryFile));
+    byte[] c = new byte[1024];
+    int count = 0;
+    int readChars = 0;
+    while ((readChars = is.read(c)) != -1) {
+        for (int i = 0; i < readChars; ++i) {
+            if (c[i] == '\n')
+                ++count;
+        }
+    }
+    return count;
+}
+
 }
