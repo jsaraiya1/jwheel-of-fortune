@@ -33,21 +33,36 @@ public class Main
         try
         {
             Board b = new Board(new File("dictionary.txt"));
+            Wheel w = new Wheel(Wheel.DOUBLE_TYPE);
+            int curSpin = w.spin();
             char guess = ' ';
+
+            for(int i=0;i<50;i++)
+                System.out.println(w.spin());
 
             do
             {
-                System.out.println("type: " + b.getCategory());
+                System.out.println("Type: " + b.getCategory());
                 System.out.println(b.getCurrentPhrase());
-
-                System.out.print("Enter a guess: ");
-                guess = is.next().charAt(0);
-                int letters = b.guessLetter(guess);
-                System.out.printf("There were %d %s's in that phrase.", letters, guess);
-                if (!b.getCurrentPhrase().contains("_"))
-                {
-                    System.out.println("You guessed the phrase!");
-                    b.newPhrase();
+                curSpin = w.spin();
+                switch(curSpin){
+                    case Wheel.BANKRUPT:
+                        //they get nothing and lose money.
+                        break;
+                    case Wheel.LOSE_A_TURN:
+                        //nothin but keep money
+                        break;
+                    default:
+                        System.out.print("You landed on $"+ curSpin +"\nEnter a guess: ");
+                        guess = is.next().charAt(0);
+                        int letters = b.guessLetter(guess);
+                        int winnings = letters * curSpin;
+                        System.out.printf("There were %d %s's in that phrase. You won: %d\n", letters, guess, winnings);
+                        if (!b.getCurrentPhrase().contains("_"))
+                        {
+                            System.out.println("You guessed the phrase!");
+                            b.newPhrase();
+                        }
                 }
             }
             while(guess != '0');
