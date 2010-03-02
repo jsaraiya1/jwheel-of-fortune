@@ -87,6 +87,13 @@ public class Board {
         }while(currentPhrase.equalsIgnoreCase(newPhrase));
         this.currentPhrase = newPhrase;
     }
+    /**
+     * This function will try to guess a letter. It return how many of that letter
+     * is in the phrase, 0 if not found, and -1 if they have already guesses that
+     * letter.
+     * @param letter - Letter to guess
+     * @return (int) Number of times that letter appears in the phrase.<br />0 - Not Found <br />-1 - Already guess<br />
+     */
     public int guessLetter(char letter)
     {
         letter = Character.toUpperCase(letter);
