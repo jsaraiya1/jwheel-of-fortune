@@ -7,6 +7,10 @@ package jwheel_of_fortune;
  * 0.2 Cameron - Changed file to be loaded into memory at initialization.  Throws exceptions to
  *               separate model from interface and allow GUI to handle errors.  Renamed fields
  *               and added comments to aid future editing.
+ * 0.3 James - Added error checking for the loadfile() and added a DELIMITER field
+ *             to specifiy custom delimiters
+ * --Isn't this what subversion is for?--
+ *
  */
 
 import java.io.File;
@@ -22,11 +26,15 @@ import java.util.Scanner;
  * 
  * @author James Gunter
  * @author Cameron Neblett
- * @version 0.2
+ * @version 0.3
  */
 public class Board
 {
     private static final String DEFAULT_FILE = "dictionary.txt";
+    /**
+     * Delimiter for loadfile() to split the phrase and the type
+     */
+    private char DELIMITER = '|';
 
     /**
      * A random number generator to be used wherever necessary.
@@ -70,6 +78,17 @@ public class Board
     }
 
     /**
+     * A constructor that takes a dictionary file name and loads it into memory.
+     *
+     * @param dictionary_filename The filename to read
+     * @throws FileNotFoundException if dictionary_file does not exist
+     */
+    public Board(final String dictionary_filename) throws FileNotFoundException
+    {
+        this(new File(dictionary_filename));
+    }
+
+    /**
      * A constructor that takes a dictionary file and loads it into memory.
      * 
      * @param dictionary_file The file to read
@@ -77,6 +96,20 @@ public class Board
      */
     public Board(final File dictionary_file) throws FileNotFoundException
     {
+        this(dictionary_file, '|');
+    }
+
+
+    /**
+     * A constructor that takes a dictionary file and custom delimiter and loads it into memory.
+     *
+     * @param dictionary_file The file to read
+     * @param delimiter A single character to delimit the phrase from its type
+     * @throws FileNotFoundException if dictionary_file does not exist
+     */
+    public Board(final File dictionary_file, char delimiter) throws FileNotFoundException
+    {
+        DELIMITER = delimiter;
         my_phrase_list = new ArrayList<String[]>();
         loadFile(dictionary_file);
         my_guesses = new boolean[26];
@@ -128,19 +161,22 @@ public class Board
 
         while (scan.hasNextLine())
         {
-//TODO: Error checking!
             final String str = scan.nextLine();
-            String[] phrase = new String[2];
-            for (int i = 0; i < str.length(); i++)
+
+            if(str.length() > 5 && str.contains(DELIMITER+"")) //no short phrases and has to have our type delimiter
             {
-                if (str.charAt(i) == '|')
+                String[] phrase = new String[2];
+                for (int i = 0; i < str.length(); i++)
                 {
-                    phrase[0] = str.substring(0, i);
-                    phrase[1] = str.substring(i + 1).toUpperCase();
-                    break;
+                    if (str.charAt(i) == DELIMITER)
+                    {
+                        phrase[0] = str.substring(0, i);
+                        phrase[1] = str.substring(i + 1).toUpperCase();
+                        break;
+                    }
                 }
-            }
             my_phrase_list.add(phrase);
+            }
         }
     }
 
@@ -171,12 +207,10 @@ public class Board
     {
         letter = Character.toUpperCase(letter);
         if(letter > 'Z' || letter < 'A')
-        {
-            //throw new IllegalArgumentException("letter must be a letter a-z");
-            return 0;   // Do we really need to throw an exception? - Cameron
-        }
+            return 0;
         if(my_guesses[letter - 'A'])
             return -1;
+
         int count = 0;
         my_guesses[letter - 'A'] = true;
         for(int i = 0; i < my_phrase.length(); i++)
