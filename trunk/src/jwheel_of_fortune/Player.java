@@ -18,6 +18,8 @@ public class Player {
     {
         this.playerName = playerName;
         this.playerImage = playerImage;
+        this.totalScore = 0;
+        this.currentScore = 0;
     }
 
     public File getPlayerImage()
